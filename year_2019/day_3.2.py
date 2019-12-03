@@ -5,22 +5,26 @@ from typing import List
 def main():
     wires = data()
 
-    first_wire = set()
+    first_wire = {}
     position = (0, 0)
+    length = 0
     for line in wires[0]:
         for steps in range(int(line[1:])):
             position = step(line[0], position)
-            first_wire.add(position)
+            length += 1
+            first_wire[position] = length
 
     position = (0, 0)
     intersections = list()
+    length = 0
     for line in wires[1]:
         for steps in range(int(line[1:])):
             position = step(line[0], position)
+            length += 1
             if position in first_wire:
-                intersections.append(position)
+                intersections.append(first_wire[position] + length)
 
-    closest_intersection = min([abs(x) + abs(y) for x, y in intersections])
+    closest_intersection = min(intersections)
     print(closest_intersection)
 
 
