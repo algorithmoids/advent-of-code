@@ -5,30 +5,22 @@ from typing import List
 def main():
     wires = data()
 
-    first_wire = {}
+    first_wire = dict(trace(wires[0]))
+    intersections = [l + first_wire[p] for p, l in trace(wires[1]) if p in first_wire]
+    print(min(intersections))
+
+
+def trace(wire):
     position = (0, 0)
     length = 0
-    for line in wires[0]:
+    for line in wire:
         for steps in range(int(line[1:])):
-            position = step(line[0], position)
             length += 1
-            first_wire[position] = length
-
-    position = (0, 0)
-    intersections = list()
-    length = 0
-    for line in wires[1]:
-        for steps in range(int(line[1:])):
-            position = step(line[0], position)
-            length += 1
-            if position in first_wire:
-                intersections.append(first_wire[position] + length)
-
-    closest_intersection = min(intersections)
-    print(closest_intersection)
+            position = move(line[0], position)
+            yield position, length
 
 
-def step(direction, position):
+def move(direction, position):
     if direction == 'L':
         return position[0] + 1, position[1]
     if direction == 'R':
