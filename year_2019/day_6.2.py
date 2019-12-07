@@ -1,6 +1,5 @@
 import time
-from collections import defaultdict
-from typing import List, Tuple
+from typing import List
 
 
 def main():
