@@ -28,16 +28,20 @@ def get_combinations(elements):
 
 
 def run_program(code, input):
+
+    def data(index, mode):
+        return code[code[index]] if mode == '0' else code[index]
+
     output = []
 
     i = 0
     while True:
-        opcode, a, b, c = parse_command(code[i])
+        opcode, a, b = parse_command(code[i])
         if opcode == '01':
-            code[code[i+3]] = (code[code[i+1]] if a == '0' else code[i+1]) + (code[code[i+2]] if b == '0' else code[i+2])
+            code[code[i+3]] = data(i+1, a) + data(i+2, b)
             i += 4
         elif opcode == '02':
-            code[code[i+3]] = (code[code[i+1]] if a == '0' else code[i+1]) * (code[code[i+2]] if b == '0' else code[i+2])
+            code[code[i+3]] = data(i+1, a) * data(i+2, b)
             i += 4
         elif opcode == '03':
             code[code[i+1]] = input.pop(0)
@@ -46,20 +50,20 @@ def run_program(code, input):
             output.append(code[code[i+1]])
             i += 2
         elif opcode == '05':
-            if (code[code[i + 1]] if a == '0' else code[i + 1]) != 0:
-                i = code[code[i + 2]] if b == '0' else code[i + 2]
+            if (data(i+1, b)) != 0:
+                i = data(i+2, b)
             else:
                 i += 3
         elif opcode == '06':
-            if (code[code[i + 1]] if a == '0' else code[i + 1]) == 0:
-                i = code[code[i + 2]] if b == '0' else code[i + 2]
+            if (data(i + 1, b)) == 0:
+                i = data(i+2, b)
             else:
                 i += 3
         elif opcode == '07':
-            code[code[i+3]] = int((code[code[i+1]] if a == '0' else code[i+1]) < (code[code[i+2]] if b == '0' else code[i+2]))
+            code[code[i+3]] = int(data(i+1, a) < data(i+2, b))
             i += 4
         elif opcode == '08':
-            code[code[i+3]] = int((code[code[i+1]] if a == '0' else code[i+1]) == (code[code[i+2]] if b == '0' else code[i+2]))
+            code[code[i+3]] = int(data(i+1, a) == data(i+2, b))
             i += 4
         elif opcode == '99':
             break
@@ -70,8 +74,8 @@ def run_program(code, input):
 
 
 def parse_command(command):
-    *_, c, b, a, s1, s2 = '0000' + str(command)
-    return s1 + s2, a, b, c
+    *_, b, a, s1, s2 = '000' + str(command)
+    return s1 + s2, a, b
 
 
 def data() -> List[int]:
