@@ -1,7 +1,3 @@
-use std::collections::LinkedList;
-use std::fs;
-use std::fs::File;
-
 fn read_input() -> Vec<&'static str> {
     let input = include_str!("input/day_01.txt");
     input.split("\n").collect()
