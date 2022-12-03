@@ -25,3 +25,24 @@ pub fn part_1() -> i32 {
 
     score
 }
+
+pub fn part_2() -> i32 {
+    let input = read_input();
+
+    let mut score: i32 = 0;
+
+    for row in input {
+        let them = row[0] as i32;
+        let me = row[1] as i32;
+
+        score += (me - 1) as i32 * 3;
+
+        score += match me {
+            2 => them,
+            1 => if them - 1 == 0 {3} else {them - 1},
+            _ => if them + 1 == 4 {1} else {them + 1},
+        };
+    }
+
+    score
+}
