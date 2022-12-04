@@ -24,3 +24,15 @@ pub fn part_1() -> i32 {
 
     including
 }
+
+pub fn part_2() -> i32 {
+    let mut overlapping = 0;
+
+    for input in read_input() {
+        if (input[2] <= input[0] && input[0] <= input[3]) || (input[0] <= input[2] && input[2] <= input[1]) {
+            overlapping += 1;
+        }
+    }
+
+    overlapping
+}
