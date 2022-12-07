@@ -1,5 +1,31 @@
 use regex::Regex;
 
+trait CrateMover<T> {
+    fn move_crates(&self, amount: i32, src: &mut Vec<T>, dst: &mut Vec<T>);
+}
+
+struct CrateMover9000 {}
+
+impl<T> CrateMover<T> for CrateMover9000 {
+    fn move_crates(&self, amount: i32, src: &mut Vec<T>, dst: &mut Vec<T>) {
+        for _ in 0 .. amount {
+            let item = src.pop().expect("Stack is empty");
+            dst.push(item);
+        }
+    }
+}
+
+struct CrateMover9001 {}
+
+impl<T> CrateMover<T> for CrateMover9001 {
+    fn move_crates(&self, amount: i32, src: &mut Vec<T>, dst: &mut Vec<T>) {
+        let range_start = src.len() - amount as usize;
+        let moved = src.drain(range_start .. );
+        dst.extend(moved);
+    }
+}
+
+
 fn read_input() -> (Vec<Vec<char>>, Vec<(i32, usize, usize)>) {
     let input = include_str!("input/day_05.txt");
 
@@ -41,18 +67,27 @@ fn read_input() -> (Vec<Vec<char>>, Vec<(i32, usize, usize)>) {
 
 }
 
-pub fn part_1() -> String {
+fn run(crate_mover: impl CrateMover<char>) -> String {
     let (mut state, steps) = read_input();
 
     for (count, src, dst) in steps {
-        for _ in 0 .. count {
-            let moved = state[src].pop().expect("Stack is empty");
-            state[dst].push(moved);
-        }
+        let mut src_stack = std::mem::replace(&mut state[src], vec![]);
+        let mut dst_stack = std::mem::replace(&mut state[dst], vec![]);
+        crate_mover.move_crates(count, &mut src_stack, &mut dst_stack);
+        state[src] = src_stack;
+        state[dst] = dst_stack;
     }
 
     state.iter()
         .map(|x| x.last()
             .expect("No empty stacks are expected in the end"))
         .collect()
+}
+
+pub fn part_1() -> String {
+    run(CrateMover9000 {})
+}
+
+pub fn part_2() -> String {
+    run(CrateMover9001 {})
 }
