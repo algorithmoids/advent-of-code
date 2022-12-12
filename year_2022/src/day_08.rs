@@ -65,3 +65,43 @@ fn get_visible_from_edge<'a>(mut forest: impl Iterator<Item = impl Iterator<Item
 
     return visible
 }
+
+pub fn part_2() -> usize {
+    let input = read_input();
+
+    let mut max_score = 0;
+
+    for i in 1 .. input.len() - 1 {
+        for j in 1 .. input[0].len() - 1 {
+            let mut score = 1;
+
+            let mut ii = i - 1;
+            while ii > 0 && input[ii][j] < input[i][j] {
+                ii -= 1;
+            }
+            score *= i - ii;
+
+            let mut ii = i + 1;
+            while ii < input.len() - 1 && input[ii][j] < input[i][j] {
+                ii += 1;
+            }
+            score *= ii - i;
+
+            let mut jj = j - 1;
+            while jj > 0 && input[i][jj] < input[i][j] {
+                jj -= 1;
+            }
+            score *= j - jj;
+
+            let mut jj = j + 1;
+            while jj < input[0].len() - 1 && input[i][jj] < input[i][j] {
+                jj += 1;
+            }
+            score *= jj - j;
+
+            max_score = max_score.max(score);
+        }
+    }
+
+    max_score
+}
