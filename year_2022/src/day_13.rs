@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::vec;
 
 #[derive(Debug)]
@@ -57,15 +59,15 @@ fn parse_subsignal(chars: &[char]) -> (usize, Signal) {
     unreachable!("It should always be a `]`")
 }
 
-fn compare(a: &Signal, b: &Signal) -> i32 {
+fn compare(a: &Signal, b: &Signal) -> Ordering {
     if let (Signal::Value(a), Signal::Value(b)) = (a, b) {
         if *a < *b {
-            return -1
+            return Less
         }
         else if *a > *b {
-            return 1
+            return Greater
         }
-        return 0
+        return Equal
     }
 
     let glob_a;
@@ -90,28 +92,48 @@ fn compare(a: &Signal, b: &Signal) -> i32 {
 
     for i in 0 .. a.len().max(b.len()) {
         if a.len() == i {
-            return -1
+            return Less
         }
         if b.len() == i {
-            return 1
+            return Greater
         }
 
         let subcompare = compare(&a[i], &b[i]);
-        if subcompare != 0 {
+        if subcompare != Equal {
             return subcompare
         }
     }
 
-    0
+    Equal
 }
 
 pub fn part_1() -> usize {
     let mut checksum = 0;
     for (i, (a, b)) in read_input().into_iter().enumerate() {
-        if compare(&a, &b) == -1 {
+        if compare(&a, &b) == Less {
             checksum += i + 1;
         }
     }
 
     return checksum
+}
+
+pub fn part_2() -> usize {
+    let mut signals: Vec<_> = read_input().into_iter()
+        .map(|(a, b)| vec![a, b])
+        .flatten()
+        .collect();
+
+    signals.sort_by(compare);
+
+    let s2: Vec<char> = "[[2]]".chars().into_iter().collect();
+    let (_, s2) = parse_subsignal(&s2[1..]);
+
+    let s6: Vec<char> = "[[6]]".chars().into_iter().collect();
+    let (_, s6) = parse_subsignal(&s6[1..]);
+
+    let s2p = signals.binary_search_by(|x| compare(x, &s2));
+    let s6p = signals.binary_search_by(|x| compare(x, &s6));
+
+    return (s2p.unwrap_err() + 1) * (s6p.unwrap_err() + 2)
 }

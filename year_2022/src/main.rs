@@ -22,5 +22,6 @@ fn main() {
     println!("Day 6.2: {}", day_06::part_2());
     println!("Day 8.1: {}", day_08::part_1());
     println!("Day 8.2: {}", day_08::part_2());
-    println!("Day 13.1: {}", day_13::part_1())
+    println!("Day 13.1: {}", day_13::part_1());
+    println!("Day 13.2: {}", day_13::part_2())
 }
