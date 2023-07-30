@@ -73,3 +73,39 @@ pub fn part_1() -> usize {
         count += 1
     }
 }
+
+pub fn part_2() -> usize {
+    let (mut blocks, lowest_point) = get_blocks(read_input());
+    let mut count = 0;
+
+    loop {
+        let mut sand = (500, 0);
+        loop {
+            if sand.1 == lowest_point + 1 {
+                blocks.insert(sand);
+                break
+            }
+
+            if !blocks.contains(&(sand.0, sand.1 + 1)) {
+                sand = (sand.0, sand.1 + 1);
+            }
+            else if !blocks.contains(&(sand.0 - 1, sand.1 + 1)) {
+                sand = (sand.0 - 1, sand.1 + 1);
+            }
+            else if !blocks.contains(&(sand.0 + 1, sand.1 + 1)) {
+                sand = (sand.0 + 1, sand.1 + 1);
+            }
+            else {
+                if sand == (500, 0) {
+                    return count + 1
+                }
+
+                blocks.insert(sand);
+                break
+            }
+
+        }
+
+        count += 1
+    }
+}
