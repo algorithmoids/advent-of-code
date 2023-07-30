@@ -7,6 +7,7 @@ mod day_06;
 mod day_08;
 mod day_13;
 mod day_14;
+mod day_15;
 
 fn main() {
     println!("Day 1.1: {}", day_01::part_1());
@@ -27,4 +28,5 @@ fn main() {
     println!("Day 13.2: {}", day_13::part_2());
     println!("Day 14.1: {}", day_14::part_1());
     println!("Day 14.2: {}", day_14::part_2());
+    println!("Day 15.1: {}", day_15::part_1());
 }
