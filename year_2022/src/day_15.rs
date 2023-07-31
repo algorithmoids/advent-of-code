@@ -1,3 +1,4 @@
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::collections::HashSet;
 use std::ops::Deref;
 use regex::Regex;
@@ -23,18 +24,18 @@ fn read_input() -> Vec<Vec<i32>> {
     sensors
 }
 
-pub fn part_1() -> usize {
+pub fn part_1() -> i32 {
     let mut sensors = HashSet::new();
     let mut beacons = HashSet::new();
 
     let y_row = 2000000;
 
-    let mut on_line = HashSet::new();
-
     for row in read_input() {
         sensors.insert((row[0], row[1]));
         beacons.insert((row[2], row[3]));
     }
+
+    let mut ranges = vec![];
 
     for row in read_input() {
         let [sx, sy, bx, by] = row.deref()
@@ -44,68 +45,58 @@ pub fn part_1() -> usize {
 
         if sy < &y_row && sy + distance >= y_row {
             let len_x = sy + distance - y_row;
-            for x in sx - len_x ..= sx + len_x {
-                if !sensors.contains(&(x, y_row)) && !beacons.contains(&(x, y_row)) {
-                    on_line.insert(x);
-                }
-            }
+            ranges.push((sx - len_x, sx + len_x));
         }
 
         if sy > &y_row && sy - distance <= y_row {
             let len_x = y_row - (sy - distance);
-            for x in sx - len_x ..= sx + len_x {
-                if !sensors.contains(&(x, y_row)) && !beacons.contains(&(x, y_row)) {
-                    on_line.insert(x);
-                }
-            }
+            ranges.push((sx - len_x, sx + len_x));
         }
     }
 
-    on_line.len()
+    let merged = merge(ranges);
+    let mut count = merged.iter().map(|(a, b)| b - a + 1).sum();
+
+    for (sx, sy) in sensors.iter().chain(beacons.iter()) {
+        if sy == &y_row && merged.binary_search_by(|(a, b)|
+                if b < sx { Less } else if a > sx { Greater } else { Equal }).is_ok() {
+            count -= 1;
+        }
+    }
+
+    count
 }
 
-pub fn _part_1_slow() -> usize {
-    let mut empty = HashSet::new();
-    let mut sensors = HashSet::new();
-    let mut beacons = HashSet::new();
+fn merge(ranges: Vec<(i32, i32)>) -> Vec<(i32, i32)> {
+    let mut uncrossing_ranges: Vec<(i32, i32)> = vec![];
 
-    let y = 2000000;
+    for (mut a, mut b) in ranges {
+        let index_start = uncrossing_ranges.binary_search_by(|x|
+                if x.1 > a { Greater } else if x.1 < a { Less } else {Equal} );
 
-    let mut on_line = HashSet::new();
+        let index_end = uncrossing_ranges.binary_search_by(|x|
+                if x.0 > b { Greater } else if x.0 < b { Less } else {Equal} );
 
-    for row in read_input() {
-        sensors.insert((row[0], row[1]));
-        beacons.insert((row[2], row[3]));
-    }
+        if index_start == index_end && index_start.is_err() {
+            uncrossing_ranges.insert(index_start.unwrap_err(), (a, b))
+        }
+        else {
+            let index = index_start.unwrap_or_else(|x| x);
 
-    for row in read_input() {
-        let [sx, sy, bx, by] = row.deref()
-            else { panic!("Not enough values") };
+            a = a.min(uncrossing_ranges[index].0);
 
-        let distance = (sx - bx).abs() + (sy - by).abs();
-
-        for i in 1 ..= distance {
-            for j in 0 .. i {
-                let steps = [
-                    (sx - i + j, sy + j),
-                    (sx + j, sy + i - j),
-                    (sx + i - j, sy - j),
-                    (sx - j, sy - i + j),
-                ];
-
-                for p in steps {
-
-                    if !sensors.contains(&p) && !beacons.contains(&p) {
-                        empty.insert(p);
-
-                        if p.1 == y {
-                            on_line.insert(p.0);
-                        }
-                    }
+            loop {
+                if uncrossing_ranges.len() == index || uncrossing_ranges[index].0 > b {
+                    uncrossing_ranges.insert(index, (a, b));
+                    break
+                }
+                else {
+                    b = b.max(uncrossing_ranges[index].1);
+                    uncrossing_ranges.remove(index);
                 }
             }
         }
-    }
 
-    on_line.len()
+    }
+    uncrossing_ranges
 }
