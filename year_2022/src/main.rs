@@ -31,6 +31,7 @@ fn main() {
     run_measure("Day 14.1", &day_14::part_1);
     run_measure("Day 14.2", &day_14::part_2);
     run_measure("Day 15.1", &day_15::part_1);
+    run_measure("Day 15.2", &day_15::part_2);
 }
 
 fn run_measure<T: std::fmt::Display>(name: &str, function: &dyn Fn() -> T) {

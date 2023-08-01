@@ -1,5 +1,5 @@
 use std::cmp::Ordering::{Equal, Greater, Less};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use regex::Regex;
 
@@ -99,4 +99,115 @@ fn merge(ranges: Vec<(i32, i32)>) -> Vec<(i32, i32)> {
 
     }
     uncrossing_ranges
+}
+
+#[derive(Debug)]
+struct Segment {
+    root: i32,
+    top: i32,
+    bottom: i32,
+}
+
+#[derive(Debug)]
+struct Bounds {
+    left: HashMap<i32, Vec<Segment>>,
+    right: HashMap<i32, Vec<Segment>>,
+    top: HashMap<i32, Vec<Segment>>,
+    bottom: HashMap<i32, Vec<Segment>>,
+}
+
+pub fn part_2() -> i64 {
+    let bounds = get_bounds();
+
+    let ascending = get_narrow_ranges(bounds.left, bounds.right);
+    let descending = get_narrow_ranges(bounds.top, bounds.bottom);
+
+    for a in ascending.iter() {
+        for d in descending.iter() {
+            if a.top.min(a.top) > a.bottom.max(d.bottom) {
+                let x = ((a.root + d.root) / 2) as i64;
+                let y = ((a.root - d.root) / 2) as i64;
+                return x * 4000000 + y;
+            }
+        }
+    }
+
+    unreachable!()
+}
+
+fn get_bounds() -> Bounds {
+
+    let mut bounds = Bounds {
+        left: HashMap::new(),
+        right: HashMap::new(),
+        top: HashMap::new(),
+        bottom: HashMap::new(),
+    };
+
+    for row in read_input() {
+        let [sx, sy, bx, by] = row[..4]
+            else { panic!("Input parser failed") };
+
+        let distance = (sx - bx).abs() + (sy - by).abs();
+
+        add_bound(&mut bounds.left, Segment {
+            root: sx - distance + sy,
+            top: sy,
+            bottom: sy - distance,
+        });
+
+        add_bound(&mut bounds.right, Segment {
+            root: sx + distance + sy,
+            top: sy + distance,
+            bottom: sy,
+        });
+
+        add_bound(&mut bounds.top, Segment {
+            root: sx - distance - sy,
+            top: sy + distance,
+            bottom: sy,
+        });
+
+        add_bound(&mut bounds.bottom, Segment {
+            root: sx + distance - sy,
+            top: sy,
+            bottom: sy - distance,
+        });
+    }
+
+    bounds
+
+}
+
+fn add_bound(side: &mut HashMap<i32, Vec<Segment>>, bound: Segment) {
+    if side.contains_key(&bound.root) {
+        side.get_mut(&bound.root).unwrap().push(bound);
+    }
+    else {
+        side.insert(bound.root, vec![bound]);
+    }
+}
+
+fn get_narrow_ranges(left: HashMap<i32, Vec<Segment>>, right: HashMap<i32, Vec<Segment>>) -> Vec<Segment> {
+    let empty_vec = vec![];
+    let mut segments = vec![];
+
+    for (left_root, left) in left {
+        let right_segments = right.get(&(left_root - 2))
+            .unwrap_or(&empty_vec);
+
+        for left_segment in left {
+            for right_segment in right_segments {
+                if left_segment.top.min(right_segment.top) >= left_segment.bottom.max(right_segment.bottom) {
+                    segments.push(Segment {
+                        root: left_root - 1,
+                        top: left_segment.top.min(right_segment.top),
+                        bottom: left_segment.bottom.max(right_segment.bottom)
+                    });
+                }
+            }
+        }
+    }
+
+    segments
 }
