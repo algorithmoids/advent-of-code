@@ -69,15 +69,30 @@ fn read_input() -> Vec<Game> {
 pub(crate) fn part_1() -> usize {
     let mut possible = 0;
     for game in read_input() {
-        let combined_max = game.sets.into_iter().reduce(|a, b| Set {
-            red: a.red.max(b.red),
-            green: a.green.max(b.green),
-            blue: a.blue.max(b.blue),
-        }).unwrap();
+        let combined_max = combined_max(game.sets);
 
         if combined_max.red <= 12 && combined_max.green <= 13 && combined_max.blue <= 14 {
             possible += game.id;
         }
     }
     possible
+}
+
+pub(crate) fn part_2() -> u32 {
+    let mut powers = 0;
+    for game in read_input() {
+        let combined_max = combined_max(game.sets);
+
+        powers += combined_max.red * combined_max.green * combined_max.blue
+    }
+    powers
+}
+
+fn combined_max(sets: Vec<Set>) -> Set {
+    sets.into_iter()
+        .reduce(|a, b| Set {
+            red: a.red.max(b.red),
+            green: a.green.max(b.green),
+            blue: a.blue.max(b.blue),
+        }).unwrap()
 }
